@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>AI PERSONAL ASSISTANT</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+</head>
+
+<body>
+    <h1 class="main-heading">AI PERSONAL ASSISTANT</h1>
+
+    <div class="container">
+        <div class="main">
+            <h2> Ask Anything</h2>
+            <form id="askForm">
+                <input type="text" name="question" id="question" placeholder="Ask Anything..." required>
+                <button type="submit">Ask</button>
+            </form>
+            <p id="ans-loading" style="display: none;">Processing...</p>
+            <p id="answer"></p>
+
+            <hr>
+
+            <h2> Summarise Email</h2>
+            <form id="emailForm">
+                <textarea name="email" placeholder="Paste your email here..." required></textarea>
+                <button type="submit">Summarise</button>
+            </form>
+            <p id="summary-loading" style="display: none;">Processing...</p>
+            <p id="summary"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("askForm").onsubmit = async (e) => {
+            e.preventDefault();
+            let formData = new FormData(e.target);
+            let loading = document.getElementById("ans-loading");
+            let ansEl = document.getElementById("answer");
+            loading.style.display = "block";
+            ansEl.innerText = "";
+            ansEl.style.color = "";
+            try {
+                let res = await fetch("/ask", {
+                    method: "POST",
+                    body: formData,
+                });
+                let data = await res.json();
+                if (data.error) {
+                    ansEl.style.color = "red";
+                    ansEl.innerText = "Error: " + data.error;
+                } else {
+                    ansEl.innerText = data.response;
+                }
+            } catch (err) {
+                ansEl.style.color = "red";
+                ansEl.innerText = "Failed to connect: " + err.message;
+            } finally {
+                loading.style.display = "none";
+            }
+        };
+
+        document.getElementById("emailForm").onsubmit = async (e) => {
+            e.preventDefault();
+            let formData = new FormData(e.target);
+            let loading = document.getElementById("summary-loading");
+            let sumEl = document.getElementById("summary");
+            loading.style.display = "block";
+            sumEl.innerText = "";
+            sumEl.style.color = "";
+            try {
+                let res = await fetch("/summarise", {
+                    method: "POST",
+                    body: formData,
+                });
+                let data = await res.json();
+                if (data.error) {
+                    sumEl.style.color = "red";
+                    sumEl.innerText = "Error: " + data.error;
+                } else {
+                    sumEl.innerText = data.summary;
+                }
+            } catch (err) {
+                sumEl.style.color = "red";
+                sumEl.innerText = "Failed to connect: " + err.message;
+            } finally {
+                loading.style.display = "none";
+            }
+        };
+    </script>
+</body>
+
+</html>
